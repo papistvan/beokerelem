@@ -98,7 +98,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 2,
+    padding: 20,
+    margin: "auto",
+    width: "50%",
+    maxWidth: 400,
   },
   label: {
     fontSize: 16,

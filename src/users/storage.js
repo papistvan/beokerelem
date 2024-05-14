@@ -1,12 +1,14 @@
 import sqlite3 from "sqlite3";
+import bcrypt from "bcryptjs";
 
 export function setupUserDatabase(db) {
   return new Promise((resolve, reject) => {
     db.run(
       `
       CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        password TEXT NOT NULL,
         positions TEXT NOT NULL
       )
     `,
@@ -20,33 +22,49 @@ export function setupUserDatabase(db) {
 
 export async function connectToUserSqlite(db) {
   return {
-    saveUser: (user) => {
-      const { name, kind, positions } = user;
+    saveUser: async (user) => {
+      const { username, name, password, positions } = user;
+      const hashedPassword = await bcrypt.hash(password, 10);
       return new Promise((resolve, reject) => {
         db.run(
-          "INSERT INTO users (name, kind, positions) VALUES (?, ?, ?)",
-          [name, JSON.stringify(kind), JSON.stringify(positions)],
+          "INSERT INTO users (username, name, password, positions) VALUES (?, ?, ?, ?)",
+          [username, name, hashedPassword, JSON.stringify(positions)],
           function (err) {
             if (err) reject(err);
-            else resolve();
+            else resolve(this.lastID);
           }
         );
       });
     },
-    getUserById: (id) => {
+    getUserByUsername: (username) => {
       return new Promise((resolve, reject) => {
-        db.get("SELECT * FROM users WHERE id = ?", [id], (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
+        console.log(`Attempting to fetch user with username: ${username}`);
+        db.get(
+          "SELECT * FROM users WHERE username = ?",
+          [username],
+          (err, row) => {
+            if (err) {
+              console.error("Error fetching user:", err);
+              reject(err);
+            } else {
+              if (row) {
+                console.log("User found:", row);
+              } else {
+                console.log("No user found with that username.");
+              }
+              resolve(row);
+            }
+          }
+        );
       });
     },
-    updateUserById: (id, updates) => {
-      const { name, kind, positions } = updates;
+
+    updateUserByUsername: (username, updates) => {
+      const { name, positions } = updates;
       return new Promise((resolve, reject) => {
         db.run(
-          "UPDATE users SET name = ?, kind = ?, positions = ? WHERE id = ?",
-          [name, JSON.stringify(kind), JSON.stringify(positions), id],
+          "UPDATE users SET name = ?, positions = ? WHERE username = ?",
+          [name, JSON.stringify(positions), username],
           function (err) {
             if (err) reject(err);
             else resolve();

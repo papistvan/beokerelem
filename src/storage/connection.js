@@ -5,21 +5,22 @@ import {
   connectToWorkDaySqlite,
 } from "../workday/storage.js";
 
-export default function connectToSqlite(filepath, callback) {
-  const db = new sqlite3.Database(filepath, async (err) => {
+const dbPath = "schedule.db";
+
+export const dbConnection = new Promise((resolve, reject) => {
+  const db = new sqlite3.Database(dbPath, async (err) => {
     if (err) {
-      callback(err, null);
+      reject("Database connection error: " + err.message);
       return;
     }
-
     try {
-      await setupWorkDayDatabase(db); // Set up tables for workday
-      await setupUserDatabase(db); // Set up tables for users
+      await setupWorkDayDatabase(db);
+      await setupUserDatabase(db);
       const userStorage = await connectToUserSqlite(db);
       const workdayStorage = await connectToWorkDaySqlite(db);
-      callback(null, { userStorage, workdayStorage });
-    } catch (dbErr) {
-      callback(dbErr, null);
+      resolve({ userStorage, workdayStorage });
+    } catch (error) {
+      reject("Database setup error: " + error.message);
     }
   });
-}
+});

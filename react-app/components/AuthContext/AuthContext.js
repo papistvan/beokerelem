@@ -12,8 +12,16 @@ export const AuthProvider = ({ children }) => {
     //maybesave token to secure storage
   };
 
+  const signOut = () => {
+    setUser(null);
+  };
+
+  const isNotAuthenticated = () => !!user;
+
   return (
-    <AuthContext.Provider value={{ user, token, signIn }}>
+    <AuthContext.Provider
+      value={{ user, token, signIn, isNotAuthenticated, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

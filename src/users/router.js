@@ -30,9 +30,16 @@ export function createUserRouter(storage) {
             return;
           }
           console.log("Token generated", token);
+          res.json({
+            token,
+            user: {
+              name: user.name,
+              username: user.username,
+              positions: user.positions,
+            },
+          });
         }
       );
-      res.json({ token, user });
     } catch (error) {
       res.status(500).json({ message: "Login failed", error: error.message });
     }

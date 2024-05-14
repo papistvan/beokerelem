@@ -1,32 +1,44 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../AuthContext/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = () => {
+  const navigation = useNavigation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn } = useContext(AuthContext);
+  const { signIn, isNotAuthenticated } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!isNotAuthenticated) {
+      navigation.navigate("WorkDayList");
+    }
+  }, [isNotAuthenticated, navigation]);
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:3000/users/login", {
-        username,
-        password,
-      });
-      console.log("Login response", response.data);
-      if (response.data.token) {
-        signIn(response.data.token, response.data.user);
-        Toast.show({
-          type: "success",
-          position: "bottom",
-          text1: "Login Successful",
-          text2: "Welcome back!",
-          visibilityTime: 4000,
-          autoHide: true,
+      const response = await axios
+        .post("http://localhost:3000/users/login", {
+          username,
+          password,
+        })
+        .then((response) => {
+          console.log("Login request", response.data);
+          if (response.data.token) {
+            signIn(response.data.token, response.data.user);
+            console.log("Logged in", response.data.token);
+            Toast.show({
+              type: "success",
+              position: "bottom",
+              text1: "Login Successful",
+              text2: "Welcome back!",
+              visibilityTime: 4000,
+              autoHide: true,
+            });
+          }
         });
-      }
     } catch (error) {
       if (error.response) {
         if (error.response.status === 401) {
@@ -57,7 +69,6 @@ const LoginScreen = ({ navigation }) => {
           visibilityTime: 4000,
           autoHide: true,
         });
-        console.log("Error details:", error.message);
       }
     }
   };

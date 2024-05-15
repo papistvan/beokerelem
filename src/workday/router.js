@@ -1,7 +1,6 @@
 import express from "express";
 import { addDaySchema, updateDayByDateSchema } from "./schema.js";
 import { protect, boss } from "../middleware/auth.js";
-import e from "express";
 
 export function createWorkDayRouter(storage) {
   const router = express.Router();

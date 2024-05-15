@@ -1,4 +1,4 @@
-import { useContext, React } from "react";
+import React, { useContext } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import {
@@ -6,14 +6,14 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./components/LoginComponents/LoginScreen.js";
-import WorkDayList from "./components/WorkDayComponents/WorkDayList.js";
+import LoginScreen from "./components/LoginComponents/LoginScreen";
+import WorkDayList from "./components/WorkDayComponents/WorkDayList";
 import {
   AuthProvider,
   AuthContext,
-} from "./components/AuthContext/AuthContext.js";
+} from "./components/AuthContext/AuthContext";
 import Toast from "react-native-toast-message";
-import LogoutButton from "./components/LoginComponents/LogoutButton.js";
+import LogoutButton from "./components/LoginComponents/LogoutButton";
 
 const Stack = createStackNavigator();
 
@@ -40,18 +40,12 @@ function AppStack() {
 export default function App() {
   const navigationRef = useNavigationContainerRef();
 
-  const handleNavigation = (name) => {
-    if (navigationRef.isReady()) {
-      navigationRef.navigate(name);
-    }
-  };
-
   return (
     <AuthProvider>
       <NavigationContainer ref={navigationRef}>
         <AppStack />
         <StatusBar style="auto" />
-        <Toast /> {/* ref={(ref) => Toast.setRef(ref)}  */}
+        <Toast />
       </NavigationContainer>
     </AuthProvider>
   );

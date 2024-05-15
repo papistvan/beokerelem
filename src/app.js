@@ -14,7 +14,7 @@ export default function createApp({ userStorage, workdayStorage }) {
   app.use("/users", createUserRouter(userStorage));
 
   app.use(
-    "/workday",
+    "/workdays",
     async (req, res, next) => {
       console.log("AUTH Middleware"); //TODO auth middleware
       next();

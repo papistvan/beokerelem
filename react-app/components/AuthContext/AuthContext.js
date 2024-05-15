@@ -9,18 +9,20 @@ export const AuthProvider = ({ children }) => {
   const signIn = (newToken, newUser) => {
     setToken(newToken);
     setUser(newUser);
-    //maybesave token to secure storage
   };
 
   const signOut = () => {
     setUser(null);
+    setToken(null);
   };
 
-  const isNotAuthenticated = () => !!user;
+  const isNotAuthenticated = () => !user;
+
+  const isBoss = () => user && user.positions.includes("boss");
 
   return (
     <AuthContext.Provider
-      value={{ user, token, signIn, isNotAuthenticated, signOut }}
+      value={{ user, token, signIn, isNotAuthenticated, signOut, isBoss }}
     >
       {children}
     </AuthContext.Provider>

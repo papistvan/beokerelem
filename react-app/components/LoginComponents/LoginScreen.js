@@ -1,9 +1,10 @@
 import React, { useState, useContext, useEffect } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import axios from "axios";
 import Toast from "react-native-toast-message";
 import { AuthContext } from "../AuthContext/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import api from "../../api";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -19,26 +20,23 @@ const LoginScreen = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios
-        .post("http://localhost:3000/users/login", {
-          username,
-          password,
-        })
-        .then((response) => {
-          console.log("Login request", response.data);
-          if (response.data.token) {
-            signIn(response.data.token, response.data.user);
-            console.log("Logged in", response.data.token);
-            Toast.show({
-              type: "success",
-              position: "bottom",
-              text1: "Login Successful",
-              text2: "Welcome back!",
-              visibilityTime: 4000,
-              autoHide: true,
-            });
-          }
+      const response = await api.post("/users/login", {
+        username,
+        password,
+      });
+
+      if (response.data.token) {
+        await AsyncStorage.setItem("token", response.data.token);
+        signIn(response.data.token, response.data.user);
+        Toast.show({
+          type: "success",
+          position: "bottom",
+          text1: "Login Successful",
+          text2: "Welcome back!",
+          visibilityTime: 4000,
+          autoHide: true,
         });
+      }
     } catch (error) {
       if (error.response) {
         if (error.response.status === 401) {

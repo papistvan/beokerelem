@@ -5,7 +5,7 @@ export function setupWorkDayDatabase(db) {
     db.run(
       `
       CREATE TABLE IF NOT EXISTS dates (
-        date TEXT PRIMARY KEY,
+        date DATE PRIMARY KEY,
         feast BOOLEAN,
         manhour INTEGER,
         openhour INTEGER,
@@ -51,6 +51,59 @@ export async function connectToWorkDaySqlite(db) {
           }
           resolve(row);
         });
+      });
+    },
+    getAllDays: () => {
+      return new Promise((resolve, reject) => {
+        db.all("SELECT * FROM dates", (err, rows) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(rows);
+        });
+      });
+    },
+    deleteDayByDate: (date) => {
+      return new Promise((resolve, reject) => {
+        db.run("DELETE FROM dates WHERE date = ?", [date], function (err) {
+          if (err) {
+            reject(err);
+          }
+          resolve();
+        });
+      });
+    },
+    updateDayByDate: (date, day) => {
+      return new Promise((resolve, reject) => {
+        const { feast, manhour, openhour, closehour } = day;
+        db.run(
+          "UPDATE dates SET feast = ?, manhour = ?, openhour = ?, closehour = ? WHERE date = ?",
+          [feast, manhour, openhour, closehour, date],
+          function (err) {
+            if (err) {
+              reject(err);
+            }
+            resolve();
+          }
+        );
+      });
+    },
+    getAvailableWorkDays: (date) => {
+      return new Promise((resolve, reject) => {
+        db.all(
+          `
+          SELECT * FROM dates 
+          WHERE date >= DATE(?, '+7 days')
+          ORDER BY date ASC;
+          `,
+          [date],
+          (err, rows) => {
+            if (err) {
+              reject(err);
+            }
+            resolve(rows);
+          }
+        );
       });
     },
   };

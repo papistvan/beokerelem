@@ -3,6 +3,7 @@ import { dbConnection } from "../storage/connection.js";
 
 export const protect = async (req, res, next) => {
   try {
+    console.log("Protect middleware", req.headers.authorization);
     const { userStorage } = await dbConnection;
 
     if (
@@ -14,7 +15,7 @@ export const protect = async (req, res, next) => {
 
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await userStorage.getUserByName(decoded.name);
+    const user = await userStorage.getUserByUsername(decoded.name);
 
     if (!user) {
       return res.status(401).json({ message: "Not authorized" });
@@ -29,6 +30,7 @@ export const protect = async (req, res, next) => {
 };
 
 export const boss = async (req, res, next) => {
+  console.log("Boss middleware", req.user);
   if (req.user && req.user.positions.includes("boss")) {
     next();
   } else {

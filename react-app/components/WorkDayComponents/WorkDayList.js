@@ -20,6 +20,7 @@ export default function WorkDayList() {
   const { isNotAuthenticated, isBoss } = useContext(AuthContext);
 
   const [workdays, setWorkdays] = useState([]);
+  const [editingItem, setEditingItem] = useState(null);
 
   useEffect(() => {
     fetchWorkDays();
@@ -40,98 +41,6 @@ export default function WorkDayList() {
         autoHide: true,
       });
     }
-  };
-
-  const handleDeleteWorkday = async (date) => {
-    try {
-      await api.delete(`/workdays/day/${date}`);
-      fetchWorkDays();
-      Toast.show({
-        type: "success",
-        position: "bottom",
-        text1: "Munkanap törölve",
-        visibilityTime: 4000,
-        autoHide: true,
-      });
-    } catch (error) {
-      Toast.show({
-        type: "error",
-        position: "bottom",
-        text1: "Hiba a munkanap törlésekor",
-        text2: error.response?.data?.error || error.message,
-        visibilityTime: 4000,
-        autoHide: true,
-      });
-    }
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={[styles.card, item.feast && styles.feast]}>
-      <Text style={styles.date}>{item.date}</Text>
-      <Text style={styles.text}>Nyitva: {item.openhour}</Text>
-      <Text style={styles.text}>Zárás: {item.closehour}</Text>
-      <View style={styles.buttonContainer}>
-        <FontAwesome.Button
-          name="edit"
-          backgroundColor="#3b5998"
-          onPress={() => console.log(`Edit ${item.date}`)}
-        />
-        <FontAwesome.Button
-          name="trash"
-          backgroundColor="#d9534f"
-          onPress={() => handleDeleteWorkday(item.date)}
-        />
-      </View>
-    </View>
-  );
-
-  const AddWorkday = ({ onAdd }) => {
-    const [date, setDate] = useState("");
-    const [openHour, setOpenHour] = useState("");
-    const [closeHour, setCloseHour] = useState("");
-    const [manHour, setManHour] = useState("");
-    const [feast, setFeast] = useState(false);
-
-    return (
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={setDate}
-          placeholder="Dátum (YYYY-MM-DD)"
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          value={openHour}
-          onChangeText={setOpenHour}
-          placeholder="Nyitás óra"
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          value={closeHour}
-          onChangeText={setCloseHour}
-          placeholder="Zárás óra"
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          value={manHour}
-          onChangeText={setManHour}
-          placeholder="Elérhető munkaóra"
-          keyboardType="numeric"
-        />
-        <View style={styles.switchContainer}>
-          <Text>Feast</Text>
-          <Switch value={feast} onValueChange={setFeast} />
-        </View>
-        <Button
-          title="Hozzáadás"
-          onPress={() => onAdd({ date, openHour, closeHour, manHour, feast })}
-        />
-      </View>
-    );
   };
 
   const handleAddWorkday = async (workday) => {
@@ -166,6 +75,103 @@ export default function WorkDayList() {
     }
   };
 
+  const handleDeleteWorkday = async (date) => {
+    try {
+      await api.delete(`/workdays/day/${date}`);
+      fetchWorkDays();
+      Toast.show({
+        type: "success",
+        position: "bottom",
+        text1: "Munkanap törölve",
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        position: "bottom",
+        text1: "Hiba a munkanap törlésekor",
+        text2: error.response?.data?.error || error.message,
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    }
+  };
+
+  const handleEditWorkday = async (workday) => {
+    try {
+      const response = await api.put(`/workdays/day/${workday.date}`, {
+        date: workday.date,
+        openhour: Number(workday.openHour),
+        closehour: Number(workday.closeHour),
+        manhour: Number(workday.manHour),
+        feast: workday.feast,
+      });
+
+      if (response.status === 200) {
+        fetchWorkDays();
+        setEditingItem(null);
+        Toast.show({
+          type: "success",
+          position: "bottom",
+          text1: "Munkanap szerkesztve",
+          visibilityTime: 4000,
+          autoHide: true,
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        position: "bottom",
+        text1: "Hiba a munkanap szerkesztésekor",
+        text2: error.response?.data?.error || error.message,
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    }
+  };
+
+  const renderItem = ({ item }) => {
+    if (editingItem && editingItem.date === item.date) {
+      return (
+        <EditWorkday
+          workday={editingItem}
+          onEdit={handleEditWorkday}
+          onCancel={() => setEditingItem(null)}
+        />
+      );
+    }
+
+    return (
+      <View style={[styles.card, item.feast && styles.feast]}>
+        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.text}>Nyitva: {item.openhour}</Text>
+        <Text style={styles.text}>Zárás: {item.closehour}</Text>
+        {isBoss && (
+          <>
+            <Text style={styles.text}>Elérhető munkaóra: {item.manhour}</Text>
+            <View style={styles.buttonContainer}>
+              <FontAwesome.Button
+                name="edit"
+                backgroundColor="#3b5998"
+                onPress={() => setEditingItem(item)}
+              >
+                Edit
+              </FontAwesome.Button>
+              <FontAwesome.Button
+                name="trash"
+                backgroundColor="#d9534f"
+                onPress={() => handleDeleteWorkday(item.date)}
+              >
+                Delete
+              </FontAwesome.Button>
+            </View>
+          </>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Text>
@@ -186,6 +192,107 @@ export default function WorkDayList() {
     </View>
   );
 }
+
+const EditWorkday = ({ workday, onEdit, onCancel }) => {
+  const [date, setDate] = useState(workday.date);
+  const [openHour, setOpenHour] = useState(workday.openhour);
+  const [closeHour, setCloseHour] = useState(workday.closehour);
+  const [manHour, setManHour] = useState(workday.manhour);
+  const [feast, setFeast] = useState(workday.feast);
+
+  return (
+    <View style={styles.card}>
+      <TextInput
+        style={styles.input}
+        value={date}
+        onChangeText={setDate}
+        placeholder="Dátum (YYYY-MM-DD)"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={openHour.toString()}
+        onChangeText={setOpenHour}
+        placeholder="Nyitás óra"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={closeHour.toString()}
+        onChangeText={setCloseHour}
+        placeholder="Zárás óra"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={manHour.toString()}
+        onChangeText={setManHour}
+        placeholder="Elérhető munkaóra"
+        keyboardType="numeric"
+      />
+      <View style={styles.switchContainer}>
+        <Text>Feast</Text>
+        <Switch value={feast} onValueChange={setFeast} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Frissítés"
+          onPress={() => onEdit({ date, openHour, closeHour, manHour, feast })}
+        />
+        <Button title="Mégse" onPress={onCancel} />
+      </View>
+    </View>
+  );
+};
+
+const AddWorkday = ({ onAdd }) => {
+  const [date, setDate] = useState("");
+  const [openHour, setOpenHour] = useState("");
+  const [closeHour, setCloseHour] = useState("");
+  const [manHour, setManHour] = useState("");
+  const [feast, setFeast] = useState(false);
+
+  return (
+    <View style={styles.card}>
+      <TextInput
+        style={styles.input}
+        value={date}
+        onChangeText={setDate}
+        placeholder="Dátum (YYYY-MM-DD)"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={openHour}
+        onChangeText={setOpenHour}
+        placeholder="Nyitás óra"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={closeHour}
+        onChangeText={setCloseHour}
+        placeholder="Zárás óra"
+        keyboardType="numeric"
+      />
+      <TextInput
+        style={styles.input}
+        value={manHour}
+        onChangeText={setManHour}
+        placeholder="Elérhető munkaóra"
+        keyboardType="numeric"
+      />
+      <View style={styles.switchContainer}>
+        <Text>Feast</Text>
+        <Switch value={feast} onValueChange={setFeast} />
+      </View>
+      <Button
+        title="Hozzáadás"
+        onPress={() => onAdd({ date, openHour, closeHour, manHour, feast })}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

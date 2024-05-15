@@ -93,11 +93,67 @@ export function createWorkDayRouter(storage) {
 
   router.put("/day/:date", [protect, boss], async (req, res) => {
     try {
-      const date = req.params.date;
-      const day = updateDayByDateSchema.parse(req.body);
-      await storage.updateDayByDate(date, day);
+      const { date } = req.params;
+      const existingDay = await storage.getDayByDate(date).catch((err) => null);
+      if (!existingDay) {
+        throw new Error("Nem létezik ilyen nap!");
+      }
+
+      const { manhour, openhour, closehour, feast } = req.body;
+      if (
+        manhour === undefined ||
+        openhour === undefined ||
+        closehour === undefined ||
+        feast === undefined
+      ) {
+        throw new Error("Minden mező kitöltése kötelező!");
+      }
+      console.log("ünnep", feast, typeof feast);
+      const parsedData = {
+        date,
+        day: {
+          manhour: Number(manhour),
+          openhour: Number(openhour),
+          closehour: Number(closehour),
+          feast: feast ? true : false,
+        },
+      };
+      console.log(parsedData);
+      if (
+        parsedData.day.manhour < 0 ||
+        parsedData.day.openhour < 0 ||
+        parsedData.day.closehour < 0
+      ) {
+        throw new Error("Pozitív számokat adj meg kérlek!");
+      } else if (parsedData.day.openhour >= parsedData.day.closehour) {
+        throw new Error("Nyitási óra kisebb kell legyen, mint zárási óra!");
+      } else if (
+        parsedData.day.manhour <=
+        parsedData.day.closehour - parsedData.day.openhour
+      ) {
+        throw new Error(
+          "A munkaórák száma nagyobb kell legyen, mint a nyitás és zárás között eltöltött idő!"
+        );
+      }
+
+      const validatedData = updateDayByDateSchema.parse(parsedData);
+
+      const {
+        manhour: validManhour,
+        openhour: validOpenhour,
+        closehour: validClosehour,
+        feast: validFeast,
+      } = validatedData.day;
+
+      await storage.updateDayByDate(date, {
+        manhour: validManhour,
+        openhour: validOpenhour,
+        closehour: validClosehour,
+        feast: validFeast,
+      });
       res.send({ ok: true });
     } catch (error) {
+      console.log(error.message);
       res.status(400).send({ error: error.message });
     }
   });

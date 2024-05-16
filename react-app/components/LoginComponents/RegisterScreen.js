@@ -1,27 +1,35 @@
 import React, { useEffect, useContext, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet, Text, View, TextInput } from "react-native";
+import {
+  Button,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Switch,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../AuthContext/AuthContext.js";
 import Toast from "react-native-toast-message";
 import api from "../../api";
 
-export default function RegisterScreen() {
-  const navigation = useNavigation();
+export default function RegisterScreen({ navigation }) {
   const { user, isBoss } = useContext(AuthContext);
 
   const [newUser, setNewUser] = useState({
     username: "",
     password: "",
     name: "",
-    positions: "",
+    positions: [],
   });
+  const [isBossSelected, setIsBossSelected] = useState(false);
+  const [isWorkerSelected, setIsWorkerSelected] = useState(false);
 
   useEffect(() => {
     if (!isBoss) {
       navigation.navigate("WorkDayList");
     }
-  }, [isBoss, navigation]);
+  }, [isBoss]);
 
   const handleRegister = async () => {
     try {
@@ -34,18 +42,37 @@ export default function RegisterScreen() {
           visibilityTime: 4000,
           autoHide: true,
         });
-        navigation.navigate("WorkDayList");
       }
     } catch (error) {
       Toast.show({
         type: "error",
         position: "bottom",
         text1: "Hiba a regisztráció során",
-        text2: error.message || "Próbáld újra",
+        text2: error.response?.data?.error || error.message,
         visibilityTime: 4000,
         autoHide: true,
       });
     }
+  };
+
+  const updatePositions = (position, add) => {
+    setNewUser((prevUser) => {
+      const positions = prevUser.positions.filter((pos) => pos !== position);
+      if (add) {
+        positions.push(position);
+      }
+      return { ...prevUser, positions };
+    });
+  };
+
+  const handleBossChange = (value) => {
+    setIsBossSelected(value);
+    updatePositions("boss", value);
+  };
+
+  const handleWorkerChange = (value) => {
+    setIsWorkerSelected(value);
+    updatePositions("worker", value);
   };
 
   return (
@@ -68,11 +95,13 @@ export default function RegisterScreen() {
           style={styles.input}
           onChangeText={(text) => setNewUser({ ...newUser, name: text })}
         />
-        <Text style={styles.text}>Beosztás</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={(text) => setNewUser({ ...newUser, positions: text })}
-        />
+        <View style={styles.switchContainer}>
+          <Text style={styles.text}>Beosztás:</Text>
+          <Text style={styles.text}>Főnök</Text>
+          <Switch value={isBossSelected} onValueChange={handleBossChange} />
+          <Text style={styles.text}>Dolgozó</Text>
+          <Switch value={isWorkerSelected} onValueChange={handleWorkerChange} />
+        </View>
         <Button title="Regisztráció" onPress={handleRegister} />
       </View>
     </View>
@@ -113,6 +142,11 @@ const styles = StyleSheet.create({
     height: 50,
     padding: 10,
     width: "100%",
+    marginVertical: 10,
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 10,
   },
 });

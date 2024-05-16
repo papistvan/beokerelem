@@ -73,6 +73,7 @@ function AppStack({ navigationRef }) {
                   <LogoutButton />
                 </View>
               ),
+              headerTitle: "Új fiók regisztrálása",
               title: "Új fiók regisztrálása",
             }}
           />

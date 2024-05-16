@@ -47,17 +47,36 @@ export function createUserRouter(storage) {
 
   router.post("/", [protect, boss], async (req, res) => {
     try {
-      const newUser = await storage.saveUser(createUserSchema.parse(req.body));
+      const { username, password, name, positions } = req.body;
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        throw new Error("Ilyen felhasználónév már létezik!");
+      }
+      if (!username || !password || !name) {
+        throw new Error("Minden mező kitöltése kötelező!");
+      }
+      if (positions.length === 0) {
+        throw new Error("Legalább egy pozíciót válassz ki!");
+      }
+      console.log("New user created:", username, name, positions, password);
+      const validatedUser = createUserSchema.parse({
+        username,
+        password,
+        name,
+        positions,
+      });
+      console.log("Validated user:", validatedUser);
+      const newUser = await storage.saveUser(validatedUser);
+
       res.status(201).json(newUser);
     } catch (error) {
-      res
-        .status(400)
-        .json({ message: "Registration failed", error: error.message });
+      console.error("Error creating user:", error.message);
+      res.status(400).send({ error: error.message });
     }
   });
 
   router.get("/:username", [protect], async (req, res) => {
-    //TODO: lekérdezés a saját userre, egy profil oldallal
+    //TODO: lekérdezés a saját userre, + profil oldallal
     try {
       const username = req.params.username;
       const user = await storage.getUserByUsername(username);
@@ -71,7 +90,7 @@ export function createUserRouter(storage) {
   });
 
   router.put("/:username", [protect], async (req, res) => {
-    //TODO: editálási lehetőség a saját userre
+    //TODO: editálási lehetőség a saját userre, (jelszócsere, névcsere)
     try {
       const username = req.params.username;
       const userUpdates = updateUserSchema.parse(req.body);

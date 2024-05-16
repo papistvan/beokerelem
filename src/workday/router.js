@@ -66,7 +66,7 @@ export function createWorkDayRouter(storage) {
       const days = await storage.getAvailableWorkDays(date);
       res.send(days);
     } catch (error) {
-      res.status(404).send({ error: "No available workdays!" });
+      res.status(404).send({ error: "Nincs elérhető munkanap!" });
     }
   });
 

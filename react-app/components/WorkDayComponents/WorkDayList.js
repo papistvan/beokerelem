@@ -172,8 +172,8 @@ export default function WorkDayList({ navigationRef }) {
 
   return (
     <View style={styles.container}>
-      <Text>
-        Elérhető munkanapok
+      <Text style={styles.h1}>
+        Elérhető munkanapok{"  "}
         <FontAwesome.Button name="refresh" onPress={fetchWorkDays}>
           Frissítés
         </FontAwesome.Button>
@@ -229,7 +229,7 @@ const EditWorkday = ({ workday, onEdit, onCancel }) => {
         keyboardType="numeric"
       />
       <View style={styles.switchContainer}>
-        <Text>Feast</Text>
+        <Text>Ünnep</Text>
         <Switch value={feast} onValueChange={setFeast} />
       </View>
       <View style={styles.buttonContainer}>
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-evenly",
     padding: 20,
   },
   card: {
@@ -345,5 +345,11 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 25,
     fontWeight: "bold",
+  },
+  h1: {
+    fontSize: 30,
+    fontWeight: "bold",
+    marginBottom: 10,
+    padding: 10,
   },
 });

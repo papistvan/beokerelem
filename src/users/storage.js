@@ -38,7 +38,6 @@ export async function connectToUserSqlite(db) {
     },
     getUserByUsername: (username) => {
       return new Promise((resolve, reject) => {
-        console.log(`Attempting to fetch user with username: ${username}`);
         db.get(
           "SELECT * FROM users WHERE username = ?",
           [username],
@@ -47,11 +46,6 @@ export async function connectToUserSqlite(db) {
               console.error("Error fetching user:", err);
               reject(err);
             } else {
-              if (row) {
-                console.log("User found:", row);
-              } else {
-                console.log("No user found with that username.");
-              }
               resolve(row);
             }
           }

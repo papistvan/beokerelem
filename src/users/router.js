@@ -7,9 +7,38 @@ import { protect, boss } from "../middleware/auth.js";
 export function createUserRouter(storage) {
   const router = express.Router();
 
+  /**
+   * @swagger
+   * tags:
+   *   name: Users
+   *   description: User management
+   */
+
+  /**
+   * @swagger
+   * /users/login:
+   *   post:
+   *     summary: Login a user
+   *     tags: [Users]
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               username:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: User logged in successfully
+   *       401:
+   *         description: Invalid credentials
+   */
   router.post("/login", async (req, res) => {
     try {
-      console.log("Login request", req.body);
       const { username, password } = req.body;
       const user = await storage.getUserByUsername(username);
       if (!user) {
@@ -29,7 +58,6 @@ export function createUserRouter(storage) {
             console.error("Error generating token:", err);
             return;
           }
-          console.log("Token generated", token);
           res.json({
             token,
             user: {
@@ -45,6 +73,37 @@ export function createUserRouter(storage) {
     }
   });
 
+  /**
+   * @swagger
+   * /users:
+   *   post:
+   *     summary: Create a new user
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               username:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *               name:
+   *                 type: string
+   *               positions:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *     responses:
+   *       201:
+   *         description: User created successfully
+   *       400:
+   *         description: Error creating user
+   */
   router.post("/", [protect, boss], async (req, res) => {
     try {
       const { username, password, name, positions } = req.body;
@@ -58,25 +117,42 @@ export function createUserRouter(storage) {
       if (positions.length === 0) {
         throw new Error("Legalább egy pozíciót válassz ki!");
       }
-      console.log("New user created:", username, name, positions, password);
       const validatedUser = createUserSchema.parse({
         username,
         password,
         name,
         positions,
       });
-      console.log("Validated user:", validatedUser);
       const newUser = await storage.saveUser(validatedUser);
 
       res.status(201).json(newUser);
     } catch (error) {
-      console.error("Error creating user:", error.message);
       res.status(400).send({ error: error.message });
     }
   });
 
-  router.get("/:username", [protect], async (req, res) => {
-    //TODO: lekérdezés a saját userre, + profil oldallal
+  /**
+   * @swagger
+   * /users/{username}:
+   *   get:
+   *     summary: Get a user by username
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: username
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The username to get
+   *     responses:
+   *       200:
+   *         description: User retrieved successfully
+   *       404:
+   *         description: User not found
+   */
+  router.get("/:username", [protect], async (req, res) => {//TODO: lekérdezés a saját userre, + profil oldallal
     try {
       const username = req.params.username;
       const user = await storage.getUserByUsername(username);
@@ -89,8 +165,43 @@ export function createUserRouter(storage) {
     }
   });
 
-  router.put("/:username", [protect], async (req, res) => {
-    //TODO: editálási lehetőség a saját userre, (jelszócsere, névcsere)
+  /**
+   * @swagger
+   * /users/{username}:
+   *   put:
+   *     summary: Update a user by username
+   *     tags: [Users]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: username
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The username to update
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               password:
+   *                 type: string
+   *               name:
+   *                 type: string
+   *               positions:
+   *                 type: array
+   *                 items:
+   *                   type: string
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *       400:
+   *         description: Error updating user
+   */
+  router.put("/:username", [protect], async (req, res) => {//TODO: editálási lehetőség a saját userre, (jelszócsere, névcsere)
     try {
       const username = req.params.username;
       const userUpdates = updateUserSchema.parse(req.body);

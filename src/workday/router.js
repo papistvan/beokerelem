@@ -5,6 +5,44 @@ import { protect, boss } from "../middleware/auth.js";
 export function createWorkDayRouter(storage) {
   const router = express.Router();
 
+  /**
+   * @swagger
+   * tags:
+   *   name: Workdays
+   *   description: Workday management
+   */
+
+  /**
+   * @swagger
+   * /workdays/day:
+   *   post:
+   *     summary: Create a new workday
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               date:
+   *                 type: string
+   *               manhour:
+   *                 type: number
+   *               openhour:
+   *                 type: number
+   *               closehour:
+   *                 type: number
+   *               feast:
+   *                 type: boolean
+   *     responses:
+   *       200:
+   *         description: Workday created successfully
+   *       400:
+   *         description: Error creating workday
+   */
   router.post("/day", [protect, boss], async (req, res) => {
     try {
       const { date, manhour, openhour, closehour, feast } = req.body;
@@ -55,11 +93,44 @@ export function createWorkDayRouter(storage) {
     }
   });
 
+  /**
+   * @swagger
+   * /workdays/days:
+   *   get:
+   *     summary: Get all workdays
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: List of all workdays
+   */
   router.get("/days", [protect], async (req, res) => {
     const days = await storage.getAllDays();
     res.send(days);
   });
 
+  /**
+   * @swagger
+   * /workdays/{date}:
+   *   get:
+   *     summary: Get available workdays from a specific date
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: date
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The date to start the search from
+   *     responses:
+   *       200:
+   *         description: List of available workdays
+   *       404:
+   *         description: No available workdays
+   */
   router.get("/:date", [protect], async (req, res) => {
     const { date } = req.params;
     try {
@@ -70,6 +141,27 @@ export function createWorkDayRouter(storage) {
     }
   });
 
+  /**
+   * @swagger
+   * /workdays/day/{date}:
+   *   get:
+   *     summary: Get a workday by date
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: date
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The date of the workday
+   *     responses:
+   *       200:
+   *         description: Workday retrieved successfully
+   *       404:
+   *         description: Workday not found
+   */
   router.get("/day/:date", [protect], async (req, res) => {
     try {
       const date = req.params.date;
@@ -80,6 +172,27 @@ export function createWorkDayRouter(storage) {
     }
   });
 
+  /**
+   * @swagger
+   * /workdays/day/{date}:
+   *   delete:
+   *     summary: Delete a workday by date
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: date
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The date of the workday to delete
+   *     responses:
+   *       200:
+   *         description: Workday deleted successfully
+   *       404:
+   *         description: Workday not found
+   */
   router.delete("/day/:date", [protect, boss], async (req, res) => {
     try {
       const date = req.params.date;
@@ -90,6 +203,42 @@ export function createWorkDayRouter(storage) {
     }
   });
 
+  /**
+   * @swagger
+   * /workdays/day/{date}:
+   *   put:
+   *     summary: Update a workday by date
+   *     tags: [Workdays]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: date
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: The date of the workday to update
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               manhour:
+   *                 type: number
+   *               openhour:
+   *                 type: number
+   *               closehour:
+   *                 type: number
+   *               feast:
+   *                 type: boolean
+   *     responses:
+   *       200:
+   *         description: Workday updated successfully
+   *       400:
+   *         description: Error updating workday
+   */
   router.put("/day/:date", [protect, boss], async (req, res) => {
     try {
       const { date } = req.params;

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Button, Text } from "react-native";
 import {
@@ -18,9 +18,8 @@ import LogoutButton from "./components/LoginComponents/LogoutButton.js";
 
 const Stack = createStackNavigator();
 
-function AppStack() {
+function AppStack({ navigationRef }) {
   const { user, isBoss, isLoading } = useContext(AuthContext);
-  const navigation = useNavigationContainerRef();
 
   if (isLoading) {
     return (
@@ -36,13 +35,14 @@ function AppStack() {
         <>
           <Stack.Screen
             name="WorkDayList"
-            component={WorkDayList}
             options={{
               headerRight: () => (
                 <View style={{ flexDirection: "row" }}>
                   {isBoss && (
                     <Button
-                      onPress={() => navigation.navigate("Register")}
+                      onPress={() =>
+                        navigationRef.current?.navigate("Register")
+                      }
                       title="Új fiók regisztrálása"
                       color="#000"
                     />
@@ -52,7 +52,11 @@ function AppStack() {
               ),
               headerTitle: "Munkanapok",
             }}
-          />
+          >
+            {(props) => (
+              <WorkDayList {...props} navigationRef={navigationRef} />
+            )}
+          </Stack.Screen>
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
@@ -60,7 +64,9 @@ function AppStack() {
               headerRight: () => (
                 <View style={{ flexDirection: "row" }}>
                   <Button
-                    onPress={() => navigation.navigate("WorkDayList")}
+                    onPress={() =>
+                      navigationRef.current?.navigate("WorkDayList")
+                    }
                     title="Munkanapok listája"
                     color="#000"
                   />
@@ -86,11 +92,17 @@ function AppStack() {
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
+  const [navigationReady, setNavigationReady] = useState(false);
 
   return (
     <AuthProvider>
-      <NavigationContainer ref={navigationRef}>
-        <AppStack />
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => {
+          setNavigationReady(true);
+        }}
+      >
+        <AppStack navigationRef={navigationRef} />
         <StatusBar style="auto" />
         <Toast />
       </NavigationContainer>

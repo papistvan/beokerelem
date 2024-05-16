@@ -9,15 +9,13 @@ import {
   TextInput,
   Switch,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { AuthContext } from "../AuthContext/AuthContext";
+import { AuthContext } from "../AuthContext/AuthContext.js";
 import { FontAwesome } from "@expo/vector-icons";
 import Toast from "react-native-toast-message";
 import api from "../../api";
 
-export default function WorkDayList() {
-  const navigation = useNavigation();
-  const { user, isBoss } = useContext(AuthContext);
+export default function WorkDayList({ navigationRef }) {
+  const { isNotAuthenticated, isBoss } = useContext(AuthContext);
 
   const [workdays, setWorkdays] = useState([]);
   const [editingItem, setEditingItem] = useState(null);

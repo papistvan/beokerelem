@@ -14,7 +14,7 @@ import Toast from "react-native-toast-message";
 import api from "../../api";
 
 export default function RegisterScreen({ navigation }) {
-  const { user, isBoss } = useContext(AuthContext);
+  const { isBoss } = useContext(AuthContext);
 
   const [newUser, setNewUser] = useState({
     username: "",

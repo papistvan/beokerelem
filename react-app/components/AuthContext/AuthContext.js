@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isBoss, setIsBoss] = useState(false);
+  const [isWorker, setIsWorker] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }) => {
           setUser(parsedUser);
           setToken(storedToken);
           setIsBoss(parsedUser.positions.includes("boss"));
+          setIsWorker(parsedUser.positions.includes("worker"));
         }
       } catch (e) {
         console.error("Failed to load user", e);
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setToken(userToken);
       setIsBoss(userData.positions.includes("boss"));
+      setIsWorker(userData.positions.includes("worker"));
     } catch (e) {
       console.error("Failed to save user", e);
     }
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       setToken(null);
       setIsBoss(false);
+      setIsWorker(false);
     } catch (e) {
       console.error("Failed to remove user", e);
     }
@@ -56,7 +60,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isBoss, login, signOut, isLoading }}
+      value={{ user, token, isBoss, isWorker, login, signOut, isLoading }}
     >
       {children}
     </AuthContext.Provider>

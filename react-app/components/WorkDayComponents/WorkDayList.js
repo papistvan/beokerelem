@@ -15,7 +15,7 @@ import Toast from "react-native-toast-message";
 import api from "../../api";
 
 export default function WorkDayList({ navigationRef }) {
-  const { isNotAuthenticated, isBoss } = useContext(AuthContext);
+  const { isBoss, isWorker } = useContext(AuthContext);
 
   const [workdays, setWorkdays] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
@@ -145,23 +145,36 @@ export default function WorkDayList({ navigationRef }) {
         <Text style={styles.date}>{item.date}</Text>
         <Text style={styles.text}>Nyitva: {item.openhour}</Text>
         <Text style={styles.text}>Zárás: {item.closehour}</Text>
+        {isWorker && (
+          <View style={styles.buttonContainer}>
+            <FontAwesome.Button
+              name="edit"
+              backgroundColor="#3b5998"
+              onPress={() => setEditingItem(item)}
+            >
+              Jelentkezés
+            </FontAwesome.Button>
+          </View>
+        )}
+
         {isBoss && (
           <>
-            <Text style={styles.text}>Elérhető munkaóra: {item.manhour}</Text>
+            {/* <Text style={styles.text}>Elérhető munkaóra: {item.manhour}</Text> */}
+            {/* TODO: a jelentkezőket nem egész napra hanem aditt időszakra fogadjuk el, és így a kiosztható munkaóra száma csökken*/}
             <View style={styles.buttonContainer}>
               <FontAwesome.Button
                 name="edit"
                 backgroundColor="#3b5998"
                 onPress={() => setEditingItem(item)}
               >
-                Edit
+                Szerkesztés
               </FontAwesome.Button>
               <FontAwesome.Button
                 name="trash"
                 backgroundColor="#d9534f"
                 onPress={() => handleDeleteWorkday(item.date)}
               >
-                Delete
+                Törlés
               </FontAwesome.Button>
             </View>
           </>

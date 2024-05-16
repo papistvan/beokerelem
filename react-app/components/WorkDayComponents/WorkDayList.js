@@ -15,7 +15,7 @@ import Toast from "react-native-toast-message";
 import api from "../../api";
 
 export default function WorkDayList({ navigationRef }) {
-  const { isBoss, isWorker } = useContext(AuthContext);
+  const { user, isBoss, isWorker } = useContext(AuthContext);
 
   const [workdays, setWorkdays] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
@@ -35,6 +35,33 @@ export default function WorkDayList({ navigationRef }) {
         position: "bottom",
         text1: "Failed to load workdays",
         text2: error.message || "Check your connection",
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+    }
+  };
+
+  const applyToWorkday = async (date, user) => {
+    try {
+      const response = await api.post(`/schedules/apply/${date}`, {
+        user,
+      });
+      if (response.status === 200) {
+        Toast.show({
+          type: "success",
+          position: "bottom",
+          text1: "Sikeres jelentkezés",
+          text2: "Figyeld a beosztást!",
+          visibilityTime: 4000,
+          autoHide: true,
+        });
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        position: "bottom",
+        text1: "Sikertlen jelentkezés",
+        text2: error.response?.data?.error || error.message,
         visibilityTime: 4000,
         autoHide: true,
       });
@@ -150,7 +177,7 @@ export default function WorkDayList({ navigationRef }) {
             <FontAwesome.Button
               name="edit"
               backgroundColor="#3b5998"
-              onPress={() => setEditingItem(item)}
+              onPress={() => applyToWorkday(item.date, user.username)}
             >
               Jelentkezés
             </FontAwesome.Button>

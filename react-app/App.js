@@ -1,20 +1,21 @@
 import React, { useContext, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Button, Text } from "react-native";
+import { StyleSheet, View, Text, Button } from "react-native";
 import {
   NavigationContainer,
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./components/LoginComponents/LoginScreen.js";
-import RegisterScreen from "./components/LoginComponents/RegisterScreen.js";
-import WorkDayList from "./components/WorkDayComponents/WorkDayList.js";
+import LoginScreen from "./components/LoginComponents/LoginScreen";
+import RegisterScreen from "./components/LoginComponents/RegisterScreen";
+import WorkDayList from "./components/WorkDayComponents/WorkDayList";
+import ScheduleList from "./components/ScheduleComponents/ScheduleList";
 import {
   AuthProvider,
   AuthContext,
-} from "./components/AuthContext/AuthContext.js";
+} from "./components/AuthContext/AuthContext";
 import Toast from "react-native-toast-message";
-import LogoutButton from "./components/LoginComponents/LogoutButton.js";
+import LogoutButton from "./components/LoginComponents/LogoutButton";
 
 const Stack = createStackNavigator();
 
@@ -47,6 +48,13 @@ function AppStack({ navigationRef }) {
                       color="#000"
                     />
                   )}
+                  <Button
+                    onPress={() =>
+                      navigationRef.current?.navigate("ScheduleList")
+                    }
+                    title="Beosztás"
+                    color="#000"
+                  />
                   <LogoutButton />
                 </View>
               ),
@@ -58,8 +66,38 @@ function AppStack({ navigationRef }) {
             )}
           </Stack.Screen>
           <Stack.Screen
+            name="ScheduleList"
+            options={{
+              headerRight: () => (
+                <View style={{ flexDirection: "row" }}>
+                  {isBoss && (
+                    <Button
+                      onPress={() =>
+                        navigationRef.current?.navigate("Register")
+                      }
+                      title="Új fiók regisztrálása"
+                      color="#000"
+                    />
+                  )}
+                  <Button
+                    onPress={() =>
+                      navigationRef.current?.navigate("WorkDayList")
+                    }
+                    title="Munkanapok listája"
+                    color="#000"
+                  />
+                  <LogoutButton />
+                </View>
+              ),
+              headerTitle: "Beosztás",
+            }}
+          >
+            {(props) => (
+              <ScheduleList {...props} navigationRef={navigationRef} />
+            )}
+          </Stack.Screen>
+          <Stack.Screen
             name="Register"
-            component={RegisterScreen}
             options={{
               headerRight: () => (
                 <View style={{ flexDirection: "row" }}>
@@ -74,9 +112,12 @@ function AppStack({ navigationRef }) {
                 </View>
               ),
               headerTitle: "Új fiók regisztrálása",
-              title: "Új fiók regisztrálása",
             }}
-          />
+          >
+            {(props) => (
+              <RegisterScreen {...props} navigationRef={navigationRef} />
+            )}
+          </Stack.Screen>
         </>
       ) : (
         <Stack.Screen
@@ -93,16 +134,10 @@ function AppStack({ navigationRef }) {
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
-  const [navigationReady, setNavigationReady] = useState(false);
 
   return (
     <AuthProvider>
-      <NavigationContainer
-        ref={navigationRef}
-        onReady={() => {
-          setNavigationReady(true);
-        }}
-      >
+      <NavigationContainer ref={navigationRef}>
         <AppStack navigationRef={navigationRef} />
         <StatusBar style="auto" />
         <Toast />

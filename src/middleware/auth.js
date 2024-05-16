@@ -3,7 +3,6 @@ import { dbConnection } from "../storage/connection.js";
 
 export const protect = async (req, res, next) => {
   try {
-    console.log("Protect middleware", req.headers.authorization);
     const { userStorage } = await dbConnection;
 
     if (
@@ -23,13 +22,11 @@ export const protect = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.error("Authentication error:", error);
     res.status(401).json({ message: "Not authorized, token failed" });
   }
 };
 
 export const boss = async (req, res, next) => {
-  console.log("Boss middleware", req.user);
   if (req.user && req.user.positions.includes("boss")) {
     next();
   } else {

@@ -10,9 +10,9 @@ process.on("unhandledRejection", (error) => {
 });
 
 (async () => {
-  const { userStorage, workdayStorage } = await dbConnection;
+  const { userStorage, workdayStorage, scheduleStorage } = await dbConnection;
 
-  const app = createApp({ userStorage, workdayStorage });
+  const app = createApp({ userStorage, workdayStorage, scheduleStorage });
 
   app.listen(3000, () => {
     console.log("Service is listening on http://localhost:3000");

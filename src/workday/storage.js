@@ -6,10 +6,10 @@ export function setupWorkDayDatabase(db) {
       `
       CREATE TABLE IF NOT EXISTS dates (
         date DATE PRIMARY KEY,
-        feast BOOLEAN,
-        manhour INTEGER,
-        openhour INTEGER,
-        closehour INTEGER
+        feast BOOLEAN NOT NULL DEFAULT 0,
+        manhour INTEGER NOT NULL,
+        openhour INTEGER NOT NULL,
+        closehour INTEGER NOT NULL
       )
     `,
       (err) => {
@@ -42,15 +42,20 @@ export async function connectToWorkDaySqlite(db) {
     },
     getDayByDate: (date) => {
       return new Promise((resolve, reject) => {
-        db.get("SELECT * FROM dates WHERE date = ?", [date], (err, row) => {
-          if (err) {
-            reject(err);
+        console.log("getDayByDate", date);
+        db.get(
+          "SELECT * FROM dates WHERE strftime('%Y-%m-%d', date) = ?",
+          [date],
+          (err, row) => {
+            if (err) {
+              reject(err);
+            }
+            if (!row) {
+              reject(new Error("Day not found."));
+            }
+            resolve(row);
           }
-          if (!row) {
-            reject(new Error("Day not found."));
-          }
-          resolve(row);
-        });
+        );
       });
     },
     getAllDays: () => {

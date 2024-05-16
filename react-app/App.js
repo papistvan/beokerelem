@@ -6,16 +6,16 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LoginScreen from "./components/LoginComponents/LoginScreen";
-import RegisterScreen from "./components/LoginComponents/RegisterScreen";
-import WorkDayList from "./components/WorkDayComponents/WorkDayList";
-import ScheduleList from "./components/ScheduleComponents/ScheduleList";
+import LoginScreen from "./components/LoginComponents/LoginScreen.js";
+import RegisterScreen from "./components/LoginComponents/RegisterScreen.js";
+import WorkDayList from "./components/WorkDayComponents/WorkDayList.js";
+import ScheduleList from "./components/ScheduleComponents/ScheduleList.js";
 import {
   AuthProvider,
   AuthContext,
 } from "./components/AuthContext/AuthContext";
 import Toast from "react-native-toast-message";
-import LogoutButton from "./components/LoginComponents/LogoutButton";
+import LogoutButton from "./components/LoginComponents/LogoutButton.js";
 
 const Stack = createStackNavigator();
 
@@ -38,7 +38,7 @@ function AppStack({ navigationRef }) {
             name="WorkDayList"
             options={{
               headerRight: () => (
-                <View style={{ flexDirection: "row" }}>
+                <View style={styles.headerButtons}>
                   {isBoss && (
                     <Button
                       onPress={() =>
@@ -69,7 +69,7 @@ function AppStack({ navigationRef }) {
             name="ScheduleList"
             options={{
               headerRight: () => (
-                <View style={{ flexDirection: "row" }}>
+                <View style={styles.headerButtons}>
                   {isBoss && (
                     <Button
                       onPress={() =>
@@ -100,7 +100,7 @@ function AppStack({ navigationRef }) {
             name="Register"
             options={{
               headerRight: () => (
-                <View style={{ flexDirection: "row" }}>
+                <View style={styles.headerButtons}>
                   <Button
                     onPress={() =>
                       navigationRef.current?.navigate("WorkDayList")
@@ -152,5 +152,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

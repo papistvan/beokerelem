@@ -9,6 +9,7 @@ import {
   TextInput,
   Switch,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { AuthContext } from "../AuthContext/AuthContext.js";
 import { FontAwesome } from "@expo/vector-icons";
@@ -122,13 +123,13 @@ export default function ScheduleList({ navigation }) {
               <Text style={styles.text}>Jelentkezők:</Text>
               {item.applications.map((app, index) => (
                 <View key={index} style={styles.application}>
-                  <Text style={styles.text}>{app.username}</Text>
+                  <Text>{app.username}</Text>
                   <Button
-                    disabled={app.accepted}
+                    disabled={app.accepted == 0 ? false : true}
                     title="Elfogad"
                     onPress={() => acceptApplication(item.date, app.username)}
                   />
-                </View>
+                </View> 
               ))}
             </>
           )}
@@ -152,8 +153,8 @@ export default function ScheduleList({ navigation }) {
           data={scheduleDays}
           renderItem={renderItem}
           keyExtractor={(item) => item.date}
-          horizontal={true}
-          pagingEnabled={true}
+          horizontal={false}
+          pagingEnabled={false}
         />
       )}
       <StatusBar style="auto" />
@@ -167,14 +168,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-evenly",
-    padding: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
   },
   card: {
-    width: "80%",
-    minWidth: 300,
+    width: Dimensions.get("window").width * 0.9,
     justifyContent: "center",
     alignItems: "center",
-    margin: 10,
+    marginVertical: 10,
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 10,
@@ -191,11 +192,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   text: {
-    fontSize: 20,
-    height: 50,
-    padding: 10,
+    fontSize: 18,
+    height: 40,
+    padding: 5,
     width: "100%",
-    marginVertical: 10,
+    marginVertical: 5,
   },
   switchContainer: {
     flexDirection: "row",
@@ -212,14 +213,15 @@ const styles = StyleSheet.create({
     borderColor: "red",
   },
   date: {
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: "bold",
   },
   h1: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 10,
     padding: 10,
+    textAlign: "center",
   },
   application: {
     flexDirection: "row",

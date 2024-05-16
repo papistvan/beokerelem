@@ -218,14 +218,15 @@ export default function WorkDayList({ navigationRef }) {
           Frissítés
         </FontAwesome.Button>
       </Text>
-      {isBoss && <AddWorkday onAdd={handleAddWorkday} />}
+
       <FlatList
         data={workdays}
         renderItem={renderItem}
         keyExtractor={(item) => item.date}
-        horizontal={true}
-        pagingEnabled={true}
+        horizontal={false}
+        pagingEnabled={false}
       />
+      {isBoss && <AddWorkday onAdd={handleAddWorkday} />}
       <StatusBar style="auto" />
     </View>
   );
@@ -321,7 +322,7 @@ const AddWorkday = ({ onAdd }) => {
         keyboardType="numeric"
       />
       <View style={styles.switchContainer}>
-        <Text>Feast</Text>
+        <Text>Ünnep</Text>
         <Switch value={feast} onValueChange={setFeast} />
       </View>
       <Button
@@ -338,15 +339,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-evenly",
-    padding: 20,
+    padding: 10,
   },
   card: {
-    width: "80%",
-    minWidth: 300,
+    width: "90%",
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
-    padding: 20,
+    padding: 15,
     backgroundColor: "#fff",
     borderRadius: 10,
     borderWidth: 1,
@@ -362,11 +362,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   text: {
-    fontSize: 20,
-    height: 50,
-    padding: 10,
+    fontSize: 18,
+    padding: 5,
     width: "100%",
-    marginVertical: 10,
+    marginVertical: 5,
   },
   switchContainer: {
     flexDirection: "row",
@@ -383,11 +382,11 @@ const styles = StyleSheet.create({
     borderColor: "red",
   },
   date: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: "bold",
   },
   h1: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
     padding: 10,

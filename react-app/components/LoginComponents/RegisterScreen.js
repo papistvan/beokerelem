@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   switchContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 2,
   },
 });

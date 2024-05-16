@@ -45,7 +45,6 @@ export function createUserRouter(storage) {
     }
   });
 
-  // User Registration Endpoint
   router.post("/", [protect, boss], async (req, res) => {
     try {
       const newUser = await storage.saveUser(createUserSchema.parse(req.body));
@@ -58,6 +57,7 @@ export function createUserRouter(storage) {
   });
 
   router.get("/:username", [protect], async (req, res) => {
+    //TODO: lekérdezés a saját userre, egy profil oldallal
     try {
       const username = req.params.username;
       const user = await storage.getUserByUsername(username);
@@ -71,6 +71,7 @@ export function createUserRouter(storage) {
   });
 
   router.put("/:username", [protect], async (req, res) => {
+    //TODO: editálási lehetőség a saját userre
     try {
       const username = req.params.username;
       const userUpdates = updateUserSchema.parse(req.body);

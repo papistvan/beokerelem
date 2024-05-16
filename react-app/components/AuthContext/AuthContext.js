@@ -1,28 +1,62 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isBoss, setIsBoss] = useState(false);
 
-  const signIn = (newToken, newUser) => {
-    setToken(newToken);
-    setUser(newUser);
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem("user");
+        const storedToken = await AsyncStorage.getItem("token");
+        if (storedUser && storedToken) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setToken(storedToken);
+          setIsBoss(parsedUser.positions.includes("boss"));
+        }
+      } catch (e) {
+        console.error("Failed to load user", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  const login = async (userData, userToken) => {
+    try {
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem("token", userToken);
+      setUser(userData);
+      setToken(userToken);
+      setIsBoss(userData.positions.includes("boss"));
+    } catch (e) {
+      console.error("Failed to save user", e);
+    }
   };
 
-  const signOut = () => {
-    setUser(null);
-    setToken(null);
+  const signOut = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("token");
+      setUser(null);
+      setToken(null);
+      setIsBoss(false);
+    } catch (e) {
+      console.error("Failed to remove user", e);
+    }
   };
-
-  const isNotAuthenticated = () => !user;
-
-  const isBoss = () => user && user.positions.includes("boss");
 
   return (
     <AuthContext.Provider
-      value={{ user, token, signIn, isNotAuthenticated, signOut, isBoss }}
+      value={{ user, token, isBoss, login, signOut, isLoading }}
     >
       {children}
     </AuthContext.Provider>

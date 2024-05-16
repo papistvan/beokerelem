@@ -17,7 +17,7 @@ import api from "../../api";
 
 export default function WorkDayList() {
   const navigation = useNavigation();
-  const { isNotAuthenticated, isBoss } = useContext(AuthContext);
+  const { user, isBoss } = useContext(AuthContext);
 
   const [workdays, setWorkdays] = useState([]);
   const [editingItem, setEditingItem] = useState(null);

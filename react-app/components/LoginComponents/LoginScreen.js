@@ -1,119 +1,81 @@
-import React, { useState, useContext, useEffect } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
-import Toast from "react-native-toast-message";
-import { AuthContext } from "../AuthContext/AuthContext";
+import React, { useContext, useState } from "react";
+import { View, TextInput, Button, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "../../api";
+import { AuthContext } from "../AuthContext/AuthContext.js";
+import Toast from "react-native-toast-message";
+import api from "../../api.js";
 
-const LoginScreen = () => {
-  const navigation = useNavigation();
+export default function LoginScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { signIn, isNotAuthenticated } = useContext(AuthContext);
-
-  useEffect(() => {
-    if (!isNotAuthenticated) {
-      navigation.navigate("WorkDayList");
-    }
-  }, [isNotAuthenticated, navigation]);
+  const { login } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
     try {
-      const response = await api.post("/users/login", {
-        username,
-        password,
-      });
-
-      if (response.data.token) {
-        await AsyncStorage.setItem("token", response.data.token);
-        signIn(response.data.token, response.data.user);
+      const response = await api.post("/users/login", { username, password });
+      if (response.status === 200) {
+        login(response.data.user, response.data.token);
         Toast.show({
           type: "success",
           position: "bottom",
-          text1: "Login Successful",
-          text2: "Welcome back!",
+          text1: "Sikeres bejelentkezés",
           visibilityTime: 4000,
           autoHide: true,
         });
+        navigation.navigate("WorkDayList");
       }
     } catch (error) {
-      if (error.response) {
-        if (error.response.status === 401) {
-          Toast.show({
-            type: "error",
-            position: "bottom",
-            text1: "Login Failed",
-            text2: "Invalid username or password",
-            visibilityTime: 4000,
-            autoHide: true,
-          });
-        } else {
-          Toast.show({
-            type: "error",
-            position: "bottom",
-            text1: "Login Failed",
-            text2: `Error: ${error.response.status} - ${error.response.statusText}`,
-            visibilityTime: 4000,
-            autoHide: true,
-          });
-        }
-      } else {
-        Toast.show({
-          type: "error",
-          position: "bottom",
-          text1: "Network Error",
-          text2: "Unable to connect to the server. Please try again later.",
-          visibilityTime: 4000,
-          autoHide: true,
-        });
-      }
+      Toast.show({
+        type: "error",
+        position: "bottom",
+        text1: "Hiba a bejelentkezés során",
+        text2: error.message || "Próbáld újra",
+        visibilityTime: 4000,
+        autoHide: true,
+      });
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Username:</Text>
+      <Text style={styles.title}>Bejelentkezés</Text>
       <TextInput
         style={styles.input}
+        placeholder="Felhasználónév"
         value={username}
         onChangeText={setUsername}
-        autoCapitalize="none"
       />
-      <Text style={styles.label}>Password:</Text>
       <TextInput
         style={styles.input}
+        placeholder="Jelszó"
+        secureTextEntry
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
-      <Button title="Login" onPress={handleLogin} />
+      <Button title="Bejelentkezés" onPress={handleLogin} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    padding: 20,
-    margin: "auto",
-    width: "50%",
-    maxWidth: 400,
+    alignItems: "center",
+    padding: 16,
   },
-  label: {
-    fontSize: 16,
-    marginBottom: 6,
+  title: {
+    fontSize: 24,
+    marginBottom: 16,
   },
   input: {
-    minWidth: 200,
-    fontSize: 16,
+    width: "100%",
+    height: 40,
+    borderColor: "#ddd",
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
-    borderRadius: 4,
-    borderColor: "gray",
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    marginBottom: 16,
   },
 });
-
-export default LoginScreen;

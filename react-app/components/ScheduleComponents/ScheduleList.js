@@ -154,7 +154,7 @@ export default function ScheduleList({ navigation }) {
           data={scheduleDays}
           renderItem={renderItem}
           keyExtractor={(item) => item.date}
-          horizontal={false}
+          horizontal={Platform.OS === "web" ? true : false}
           pagingEnabled={false}
         />
       )}

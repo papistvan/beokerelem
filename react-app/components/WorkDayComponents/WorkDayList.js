@@ -8,6 +8,7 @@ import {
   FlatList,
   TextInput,
   Switch,
+  Platform,
 } from "react-native";
 import { AuthContext } from "../AuthContext/AuthContext.js";
 import { FontAwesome } from "@expo/vector-icons";
@@ -223,8 +224,9 @@ export default function WorkDayList({ navigationRef }) {
         data={workdays}
         renderItem={renderItem}
         keyExtractor={(item) => item.date}
-        horizontal={false}
+        horizontal={Platform.OS === "web" ? true : false}
         pagingEnabled={false}
+        showsVerticalScrollIndicator={Platform.OS === "web" ? true : false}
       />
       {isBoss && <AddWorkday onAdd={handleAddWorkday} />}
       <StatusBar style="auto" />

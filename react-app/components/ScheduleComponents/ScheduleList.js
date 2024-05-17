@@ -10,6 +10,7 @@ import {
   Switch,
   ActivityIndicator,
   Dimensions,
+  Platform,
 } from "react-native";
 import { AuthContext } from "../AuthContext/AuthContext.js";
 import { FontAwesome } from "@expo/vector-icons";
@@ -125,11 +126,11 @@ export default function ScheduleList({ navigation }) {
                 <View key={index} style={styles.application}>
                   <Text>{app.username}</Text>
                   <Button
-                    disabled={app.accepted == 0 ? false : true}
+                    disabled={app.accepted != 1 ? false : true}
                     title="Elfogad"
                     onPress={() => acceptApplication(item.date, app.username)}
                   />
-                </View> 
+                </View>
               ))}
             </>
           )}
@@ -168,15 +169,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "space-evenly",
-    paddingHorizontal: 10,
-    paddingVertical: 20,
+    padding: 10,
   },
   card: {
-    width: Dimensions.get("window").width * 0.9,
+    width: "90%",
     justifyContent: "center",
     alignItems: "center",
-    marginVertical: 10,
-    padding: 20,
+    margin: 10,
+    padding: 15,
     backgroundColor: "#fff",
     borderRadius: 10,
     borderWidth: 1,

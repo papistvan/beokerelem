@@ -50,9 +50,6 @@ export async function connectToWorkDaySqlite(db) {
             if (err) {
               reject(err);
             }
-            if (!row) {
-              reject(new Error("Day not found."));
-            }
             resolve(row);
           }
         );

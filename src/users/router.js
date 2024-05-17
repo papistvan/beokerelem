@@ -152,7 +152,8 @@ export function createUserRouter(storage) {
    *       404:
    *         description: User not found
    */
-  router.get("/:username", [protect], async (req, res) => {//TODO: lekérdezés a saját userre, + profil oldallal
+  router.get("/:username", [protect], async (req, res) => {
+    //TODO: lekérdezés a saját userre, + profil oldallal
     try {
       const username = req.params.username;
       const user = await storage.getUserByUsername(username);
@@ -201,7 +202,8 @@ export function createUserRouter(storage) {
    *       400:
    *         description: Error updating user
    */
-  router.put("/:username", [protect], async (req, res) => {//TODO: editálási lehetőség a saját userre, (jelszócsere, névcsere)
+  router.put("/:username", [protect], async (req, res) => {
+    //TODO: editálási lehetőség a saját userre, (jelszócsere, névcsere)
     try {
       const username = req.params.username;
       const userUpdates = updateUserSchema.parse(req.body);

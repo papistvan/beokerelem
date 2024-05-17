@@ -32,7 +32,7 @@ export default function createApp({
   app.use(cors());
 
   const swaggerDocs = swaggerJsDoc(swaggerOptions);
-  app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+  app.use("/swagui", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
   app.use("/users", createUserRouter(userStorage));
 

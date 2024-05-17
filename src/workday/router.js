@@ -1,8 +1,7 @@
 import express from "express";
 import { addDaySchema, updateDayByDateSchema } from "./schema.js";
-import { protect, boss } from "../middleware/auth.js";
 
-export function createWorkDayRouter(storage) {
+export function createWorkDayRouter(storage, protect, boss) {
   const router = express.Router();
 
   /**
@@ -43,14 +42,10 @@ export function createWorkDayRouter(storage) {
    *       400:
    *         description: Error creating workday
    */
-  router.post("/day", [protect, boss], async (req, res) => {
+  router.post("/day", protect, boss, async (req, res) => {
     try {
       const { date, manhour, openhour, closehour, feast } = req.body;
-      const existingDay = await storage.getDayByDate(date).catch((err) => null);
-      if (existingDay) {
-        throw new Error("A nap már létezik!");
-      }
-      console.log("ünnep", feast);
+
       if (
         !date ||
         manhour === undefined ||
@@ -60,32 +55,30 @@ export function createWorkDayRouter(storage) {
         throw new Error("Minden mező kitöltése kötelező!");
       }
 
-      const parsedData = {
-        date,
-        manhour: Number(manhour),
-        openhour: Number(openhour),
-        closehour: Number(closehour),
-        feast: feast,
-      };
-
-      if (
-        parsedData.manhour < 0 ||
-        parsedData.openhour < 0 ||
-        parsedData.closehour < 0
-      ) {
+      if (manhour < 0 || openhour < 0 || closehour < 0) {
         throw new Error("Pozitív számokat adj meg kérlek!");
-      } else if (parsedData.openhour >= parsedData.closehour) {
+      }
+      if (openhour >= closehour) {
         throw new Error("Nyitási óra kisebb kell legyen, mint zárási óra!");
-      } else if (
-        parsedData.manhour <=
-        parsedData.closehour - parsedData.openhour
-      ) {
+      }
+      if (manhour <= closehour - openhour) {
         throw new Error(
           "A munkaórák száma nagyobb kell legyen, mint a nyitás és zárás között eltöltött idő!"
         );
       }
 
-      const day = addDaySchema.parse(parsedData);
+      const existingDay = await storage.getDayByDate(date);
+      if (existingDay) {
+        throw new Error("A nap már létezik!");
+      }
+
+      const day = addDaySchema.parse({
+        date,
+        manhour,
+        openhour,
+        closehour,
+        feast,
+      });
       await storage.saveDay(day);
       res.send({ ok: true });
     } catch (error) {

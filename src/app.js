@@ -5,6 +5,7 @@ import { createScheduleRouter } from "./schedule/router.js";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
+import { protect, boss } from "./middleware/auth.js";
 
 export default function createApp({
   userStorage,
@@ -40,7 +41,7 @@ export default function createApp({
     async (req, res, next) => {
       next();
     },
-    createWorkDayRouter(workdayStorage)
+    createWorkDayRouter(workdayStorage, protect, boss)
   );
 
   app.use(
